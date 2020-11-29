@@ -1,0 +1,18 @@
+{
+    "name": "devcoder-xyz/php-dotenv",
+    "description": "Parses .env files",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fad M.R",
+            "email": "fadymichel@devcoder.xyz"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DevCoder\\": "src"
+        }
+    },
+    "require": {}
+}
