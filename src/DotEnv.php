@@ -23,7 +23,7 @@ class DotEnv
     public function load() :void
     {
         if (!is_readable($this->path)) {
-            throw new \InvalidArgumentException(sprintf('%s file is not readable', $this->path));
+            throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
         }
 
         $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
