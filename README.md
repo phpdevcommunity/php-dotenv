@@ -8,9 +8,8 @@ DATABASE_USER=root
 DATABASE_PASSWORD=root
 ```
 
-
-```
 **How to use ?**
+
 ```php
 <?php
 use DevCoder\DotEnv;
