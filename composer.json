@@ -11,8 +11,14 @@
     ],
     "autoload": {
         "psr-4": {
-            "DevCoder\\": "src"
+            "DevCoder\\": "src",
+            "Test\\DevCoder\\": "tests"
         }
     },
-    "require": {}
+    "require": {
+        "php": ">=7.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.4"
+    }
 }
