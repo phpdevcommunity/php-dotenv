@@ -42,7 +42,7 @@ class DotEnv
         $this->processOptions($options);
     }
 
-    private function processOptions(array $options)
+    private function processOptions(array $options) : void
     {
         $this->options = array_merge([
             static::PROCESS_BOOLEANS => true
@@ -52,10 +52,8 @@ class DotEnv
     /**
      * Processes the $path of the instances and parses the values into $_SERVER and $_ENV, also returns all the data that has been read.
      * Skips empty and commented lines.
-     *
-     * @return array The values that have been loaded into ENV
      */
-    public function load() :array
+    public function load() : void
     {
         if (!is_readable($this->path)) {
             throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
@@ -81,11 +79,9 @@ class DotEnv
                 $loaded[$name] = $value;
             }
         }
-
-        return $loaded;
     }
 
-    private function processValue($value) {
+    private function processValue(string $value) {
         $trimmedValue = trim($value);
 
         if (!empty($this->options[static::PROCESS_BOOLEANS])) {

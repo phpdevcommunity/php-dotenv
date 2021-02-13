@@ -18,7 +18,7 @@ use DevCoder\DotEnv;
 
 echo getenv('APP_ENV');
 // dev
-echo getenv('DATABASE_DNS')
+echo getenv('DATABASE_DNS');
 // mysql:host=localhost;dbname=test;
 ```
 Ideal for small project
