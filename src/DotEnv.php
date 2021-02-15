@@ -59,8 +59,6 @@ class DotEnv
             throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
         }
 
-        $loaded = [];
-
         $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
 
@@ -76,7 +74,6 @@ class DotEnv
                 putenv(sprintf('%s=%s', $name, $value));
                 $_ENV[$name] = $value;
                 $_SERVER[$name] = $value;
-                $loaded[$name] = $value;
             }
         }
     }
