@@ -47,17 +47,6 @@ class DotenvTest extends TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testLoadReturnsValues()
-    {
-        $loaded = (new DotEnv($this->env('.env.return')))->load();
-
-        $this->assertEquals('returned', $loaded['VALUE']);
-        $this->assertEquals('returned', $_ENV['VALUE']);
-    }
-
-    /**
-     * @runInSeparateProcess
-     */
     public function testProcessBoolean()
     {
         (new DotEnv($this->env('.env.boolean'), [
