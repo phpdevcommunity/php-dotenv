@@ -3,6 +3,7 @@
 namespace Test\DevCoder;
 
 use DevCoder\DotEnv;
+use DevCoder\Option;
 use PHPUnit\Framework\TestCase;
 
 class DotenvTest extends TestCase
@@ -50,19 +51,19 @@ class DotenvTest extends TestCase
     public function testProcessBoolean()
     {
         (new DotEnv($this->env('.env.boolean'), [
-            DotEnv::PROCESS_BOOLEANS => true
+            Option::PROCESS_BOOLEANS => true
         ]))->load();
 
         $this->assertEquals(false, $_ENV['FALSE1']);
         $this->assertEquals(false, $_ENV['FALSE2']);
         $this->assertEquals(false, $_ENV['FALSE3']);
-        $this->assertEquals("'false'", $_ENV['FALSE4']);
+        $this->assertEquals(false, $_ENV['FALSE4']);
         $this->assertEquals('0', $_ENV['FALSE5']);
 
         $this->assertEquals(true, $_ENV['TRUE1']);
         $this->assertEquals(true, $_ENV['TRUE2']);
         $this->assertEquals(true, $_ENV['TRUE3']);
-        $this->assertEquals("'true'", $_ENV['TRUE4']);
+        $this->assertEquals(true, $_ENV['TRUE4']);
         $this->assertEquals('1', $_ENV['TRUE5']);
     }
 
@@ -72,11 +73,47 @@ class DotenvTest extends TestCase
     public function testDontProcessBoolean()
     {
         (new DotEnv($this->env('.env.boolean'), [
-            DotEnv::PROCESS_BOOLEANS => false
+            Option::PROCESS_BOOLEANS => false
         ]))->load();
 
         $this->assertEquals('false', $_ENV['FALSE1']);
 
         $this->assertEquals('true', $_ENV['TRUE1']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testProcessQuotes()
+    {
+        (new DotEnv($this->env('.env.quotes'), [
+            Option::PROCESS_QUOTES => true
+        ]))->load();
+
+        $this->assertEquals('q1', $_ENV['QUOTED1']);
+        $this->assertEquals('q2', $_ENV['QUOTED2']);
+        $this->assertEquals('"q3"', $_ENV['QUOTED3']);
+        $this->assertEquals('This is a "sample" value', $_ENV['QUOTED4']);
+        $this->assertEquals('\"This is a "sample" value\"', $_ENV['QUOTED5']);
+        $this->assertEquals('"q6', $_ENV['QUOTED6']);
+        $this->assertEquals('q7"', $_ENV['QUOTED7']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDontProcessQuotes()
+    {
+        (new DotEnv($this->env('.env.quotes'), [
+            Option::PROCESS_QUOTES => false
+        ]))->load();
+
+        $this->assertEquals('"q1"', $_ENV['QUOTED1']);
+        $this->assertEquals('\'q2\'', $_ENV['QUOTED2']);
+        $this->assertEquals('""q3""', $_ENV['QUOTED3']);
+        $this->assertEquals('"This is a "sample" value"', $_ENV['QUOTED4']);
+        $this->assertEquals('\"This is a "sample" value\"', $_ENV['QUOTED5']);
+        $this->assertEquals('"q6', $_ENV['QUOTED6']);
+        $this->assertEquals('q7"', $_ENV['QUOTED7']);
     }
 }

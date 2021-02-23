@@ -5,19 +5,6 @@ namespace DevCoder;
 class DotEnv
 {
     /**
-     * Convert true and false to booleans, instead of:
-     *
-     * VARIABLE=false -> ['VARIABLE' => 'false']
-     *
-     * it will be
-     *
-     * VARIABLE=false -> ['VARIABLE' => false]
-     *
-     * default = true
-     */
-    const PROCESS_BOOLEANS = 'PROCESS_BOOLEANS';
-
-    /**
      * The directory where the .env file can be located.
      *
      * @var string
@@ -31,6 +18,13 @@ class DotEnv
      */
     protected $options = [];
 
+    /**
+     * Process strings to obtain characteristics of it
+     *
+     * @var Processor
+     */
+    protected $processor;
+
     public function __construct(string $path, array $options = [])
     {
         if (!file_exists($path)) {
@@ -40,12 +34,15 @@ class DotEnv
         $this->path = $path;
 
         $this->processOptions($options);
+
+        $this->processor = new Processor();
     }
 
     private function processOptions(array $options) : void
     {
         $this->options = array_merge([
-            static::PROCESS_BOOLEANS => true
+            Option::PROCESS_BOOLEANS => true,
+            Option::PROCESS_QUOTES => true
         ], $options);
     }
 
@@ -78,16 +75,40 @@ class DotEnv
         }
     }
 
-    private function processValue(string $value) {
-        $trimmedValue = trim($value);
+    private function processValue(string $value)
+    {
+        /**
+         * First trim spaces and quotes if configured
+         */
+        $preprocessedValue = $this->preprocessValue($value);
 
-        if (!empty($this->options[static::PROCESS_BOOLEANS])) {
-            $loweredValue = strtolower($trimmedValue);
-
-            $isBoolean = in_array($loweredValue, ['true', 'false'], true);
+        /**
+         * If the value is a boolean resolve it as such
+         */
+        if (!empty($this->options[Option::PROCESS_BOOLEANS])) {
+            $isBoolean = $this->processor->isBoolean($preprocessedValue);
 
             if ($isBoolean) {
-                return $loweredValue === 'true';
+                return $this->processor->resolveAsBoolean($preprocessedValue);
+            }
+        }
+
+        /**
+         * Does not match any processor options, return as is
+         */
+        return $preprocessedValue;
+    }
+
+    private function preprocessValue(string $value) : string
+    {
+        $trimmedValue = trim($value);
+
+        if (!empty($this->options[Option::PROCESS_QUOTES])) {
+            $wrappedBySingleQuotes = $this->processor->isWrappedByChar($trimmedValue, '\'');
+            $wrappedByDoubleQuotes = $this->processor->isWrappedByChar($trimmedValue, '"');
+
+            if ($wrappedBySingleQuotes || $wrappedByDoubleQuotes) {
+                return $this->processor->removeFirstAndLastChar($trimmedValue);
             }
         }
 
