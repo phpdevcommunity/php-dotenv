@@ -9,7 +9,7 @@ DATABASE_PASSWORD=root
 MODULE_ENABLED=true
 ```
 
-**Load the variables**
+## Load the variables
 
 ```php
 <?php
@@ -20,7 +20,7 @@ $absolutePathToEnvFile = __DIR__ . '/.env';
 (new DotEnv($absolutePathToEnvFile))->load();
 ```
 
-**Use them!**
+# Use them!
 ```php
 /**
  * string(33) "mysql:host=localhost;dbname=test;" 
@@ -45,3 +45,17 @@ var_dump(getenv('MODULE_ENABLED'));
 Ideal for small project
 
 Simple and easy!
+
+# Processors
+
+Also the variables are parsed according to the configuration passed as parameter to the constructor. The available processors are:
+
+## BooleanProcessor
+
+``VARIABLE=false`` will be processed to ```bool(false)```
+
+NOTE: ``VARIABLE="true"`` will be processed to ```string(4) "true"```
+
+## QuotedProcessor
+
+``VARIABLE="anything"`` will be processed to ```string(8) "anything"```
