@@ -4,6 +4,8 @@ namespace Test\DevCoder;
 
 use DevCoder\DotEnv;
 use DevCoder\Option;
+use DevCoder\Processor\BooleanProcessor;
+use DevCoder\Processor\QuotedProcessor;
 use PHPUnit\Framework\TestCase;
 
 class DotenvTest extends TestCase
@@ -24,6 +26,8 @@ class DotenvTest extends TestCase
         $this->assertEquals('password', getenv('DATABASE_PASSWORD'));
         $this->assertFalse(getenv('GOOGLE_API'));
         $this->assertFalse(getenv('GOOGLE_MANAGER_KEY'));
+        $this->assertEquals(true, getenv('BOOLEAN_LITERAL'));
+        $this->assertEquals('true', getenv('BOOLEAN_QUOTED'));
 
         $this->assertEquals('dev', $_ENV['APP_ENV']);
         $this->assertEquals('mysql:host=localhost;dbname=test;', $_ENV['DATABASE_DNS']);
@@ -31,6 +35,8 @@ class DotenvTest extends TestCase
         $this->assertEquals('password', $_ENV['DATABASE_PASSWORD']);
         $this->assertFalse(array_key_exists('GOOGLE_API', $_ENV));
         $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_ENV));
+        $this->assertEquals(true, $_ENV['BOOLEAN_LITERAL']);
+        $this->assertEquals('true', $_ENV['BOOLEAN_QUOTED']);
 
         $this->assertEquals('dev', $_SERVER['APP_ENV']);
         $this->assertEquals('mysql:host=localhost;dbname=test;', $_SERVER['DATABASE_DNS']);
@@ -38,6 +44,8 @@ class DotenvTest extends TestCase
         $this->assertEquals('password', $_SERVER['DATABASE_PASSWORD']);
         $this->assertFalse(array_key_exists('GOOGLE_API', $_SERVER));
         $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_SERVER));
+        $this->assertEquals(true, $_SERVER['BOOLEAN_LITERAL']);
+        $this->assertEquals('true', $_SERVER['BOOLEAN_QUOTED']);
     }
 
     public function testFileNotExist() {
@@ -51,19 +59,19 @@ class DotenvTest extends TestCase
     public function testProcessBoolean()
     {
         (new DotEnv($this->env('.env.boolean'), [
-            Option::PROCESS_BOOLEANS => true
+            BooleanProcessor::class
         ]))->load();
 
         $this->assertEquals(false, $_ENV['FALSE1']);
         $this->assertEquals(false, $_ENV['FALSE2']);
         $this->assertEquals(false, $_ENV['FALSE3']);
-        $this->assertEquals(false, $_ENV['FALSE4']);
+        $this->assertEquals("'false'", $_ENV['FALSE4']); // Since we don't have the QuotedProcessor::class this will be the result
         $this->assertEquals('0', $_ENV['FALSE5']);
 
         $this->assertEquals(true, $_ENV['TRUE1']);
         $this->assertEquals(true, $_ENV['TRUE2']);
         $this->assertEquals(true, $_ENV['TRUE3']);
-        $this->assertEquals(true, $_ENV['TRUE4']);
+        $this->assertEquals("'true'", $_ENV['TRUE4']); // Since we don't have the QuotedProcessor::class this will be the result
         $this->assertEquals('1', $_ENV['TRUE5']);
     }
 
@@ -72,9 +80,7 @@ class DotenvTest extends TestCase
      */
     public function testDontProcessBoolean()
     {
-        (new DotEnv($this->env('.env.boolean'), [
-            Option::PROCESS_BOOLEANS => false
-        ]))->load();
+        (new DotEnv($this->env('.env.boolean'), []))->load();
 
         $this->assertEquals('false', $_ENV['FALSE1']);
 
@@ -87,7 +93,7 @@ class DotenvTest extends TestCase
     public function testProcessQuotes()
     {
         (new DotEnv($this->env('.env.quotes'), [
-            Option::PROCESS_QUOTES => true
+            QuotedProcessor::class
         ]))->load();
 
         $this->assertEquals('q1', $_ENV['QUOTED1']);
@@ -104,9 +110,7 @@ class DotenvTest extends TestCase
      */
     public function testDontProcessQuotes()
     {
-        (new DotEnv($this->env('.env.quotes'), [
-            Option::PROCESS_QUOTES => false
-        ]))->load();
+        (new DotEnv($this->env('.env.quotes'), []))->load();
 
         $this->assertEquals('"q1"', $_ENV['QUOTED1']);
         $this->assertEquals('\'q2\'', $_ENV['QUOTED2']);

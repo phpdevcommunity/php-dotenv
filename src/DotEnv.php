@@ -2,6 +2,10 @@
 
 namespace DevCoder;
 
+use DevCoder\Processor\AbstractProcessor;
+use DevCoder\Processor\BooleanProcessor;
+use DevCoder\Processor\QuotedProcessor;
+
 class DotEnv
 {
     /**
@@ -14,18 +18,11 @@ class DotEnv
     /**
      * Configure the options on which the parsed will act
      *
-     * @var array
+     * @var string[]
      */
-    protected $options = [];
+    protected $processors = [];
 
-    /**
-     * Process strings to obtain characteristics of it
-     *
-     * @var Processor
-     */
-    protected $processor;
-
-    public function __construct(string $path, array $options = [])
+    public function __construct(string $path, array $processors = null)
     {
         if (!file_exists($path)) {
             throw new \InvalidArgumentException(sprintf('%s does not exist', $path));
@@ -33,17 +30,30 @@ class DotEnv
 
         $this->path = $path;
 
-        $this->processOptions($options);
-
-        $this->processor = new Processor();
+        $this->setProcessors($processors);
     }
 
-    private function processOptions(array $options) : void
+    private function setProcessors(array $processors = null) : DotEnv
     {
-        $this->options = array_merge([
-            Option::PROCESS_BOOLEANS => true,
-            Option::PROCESS_QUOTES => true
-        ], $options);
+        /**
+         * Fill with default processors
+         */
+        if ($processors === null){
+            $this->processors = [
+                BooleanProcessor::class,
+                QuotedProcessor::class
+            ];
+
+            return $this;
+        }
+
+        foreach ($processors as $processor) {
+            if (is_subclass_of($processor, AbstractProcessor::class)) {
+                $this->processors[] = $processor;
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -75,43 +85,31 @@ class DotEnv
         }
     }
 
+    /**
+     * Process the value with the configured processors
+     *
+     * @param string $value The value to process
+     * @return string|bool
+     */
     private function processValue(string $value)
     {
         /**
          * First trim spaces and quotes if configured
          */
-        $preprocessedValue = $this->preprocessValue($value);
+        $trimmedValue = trim($value);
 
-        /**
-         * If the value is a boolean resolve it as such
-         */
-        if (!empty($this->options[Option::PROCESS_BOOLEANS])) {
-            $isBoolean = $this->processor->isBoolean($preprocessedValue);
+        foreach ($this->processors as $processor) {
+            /** @var AbstractProcessor $processorInstance */
+            $processorInstance = new $processor($trimmedValue);
 
-            if ($isBoolean) {
-                return $this->processor->resolveAsBoolean($preprocessedValue);
+            if ($processorInstance->canBeProcessed()) {
+                return $processorInstance->execute();
             }
         }
 
         /**
          * Does not match any processor options, return as is
          */
-        return $preprocessedValue;
-    }
-
-    private function preprocessValue(string $value) : string
-    {
-        $trimmedValue = trim($value);
-
-        if (!empty($this->options[Option::PROCESS_QUOTES])) {
-            $wrappedBySingleQuotes = $this->processor->isWrappedByChar($trimmedValue, '\'');
-            $wrappedByDoubleQuotes = $this->processor->isWrappedByChar($trimmedValue, '"');
-
-            if ($wrappedBySingleQuotes || $wrappedByDoubleQuotes) {
-                return $this->processor->removeFirstAndLastChar($trimmedValue);
-            }
-        }
-
         return $trimmedValue;
     }
 }
