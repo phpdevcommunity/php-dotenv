@@ -6,6 +6,7 @@ use DevCoder\DotEnv;
 use DevCoder\Option;
 use DevCoder\Processor\BooleanProcessor;
 use DevCoder\Processor\QuotedProcessor;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 class DotenvTest extends TestCase
@@ -51,6 +52,52 @@ class DotenvTest extends TestCase
     public function testFileNotExist() {
         $this->expectException(\InvalidArgumentException::class);
         (new DotEnv($this->env('.env.not-exists')))->load();
+    }
+
+    public function testUncompatibleProcessors() {
+        $this->assertProcessors(
+            [],
+            []
+        );
+
+        $this->assertProcessors(
+            null,
+            [BooleanProcessor::class, QuotedProcessor::class]
+        );
+
+        $this->assertProcessors(
+            [null],
+            []
+        );
+
+        $this->assertProcessors(
+            [new \stdClass()],
+            []
+        );
+
+        $this->assertProcessors(
+            [QuotedProcessor::class, null],
+            [QuotedProcessor::class]
+        );
+    }
+
+    private function assertProcessors(array $processorsToUse = null, array $expectedProcessors = [])
+    {
+        $dotEnv = new DotEnv($this->env('.env.default'), $processorsToUse);
+        $dotEnv->load();
+
+        $this->assertEquals(
+            $expectedProcessors,
+            $this->getProtectedProperty($dotEnv, 'processors')
+        );
+    }
+
+    private function getProtectedProperty(object $object, string $property) {
+        $reflection = new \ReflectionClass($object);
+        $reflectionProperty = $reflection->getProperty($property);
+        $reflectionProperty->setAccessible(true);
+
+        return $reflectionProperty->getValue($object);
     }
 
     /**

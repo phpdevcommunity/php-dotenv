@@ -38,7 +38,7 @@ class DotEnv
         /**
          * Fill with default processors
          */
-        if ($processors === null){
+        if ($processors === null) {
             $this->processors = [
                 BooleanProcessor::class,
                 QuotedProcessor::class
