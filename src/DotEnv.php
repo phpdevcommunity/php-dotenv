@@ -2,21 +2,12 @@
 
 namespace DevCoder;
 
+use DevCoder\Processor\AbstractProcessor;
+use DevCoder\Processor\BooleanProcessor;
+use DevCoder\Processor\QuotedProcessor;
+
 class DotEnv
 {
-    /**
-     * Convert true and false to booleans, instead of:
-     *
-     * VARIABLE=false -> ['VARIABLE' => 'false']
-     *
-     * it will be
-     *
-     * VARIABLE=false -> ['VARIABLE' => false]
-     *
-     * default = true
-     */
-    const PROCESS_BOOLEANS = 'PROCESS_BOOLEANS';
-
     /**
      * The directory where the .env file can be located.
      *
@@ -27,11 +18,11 @@ class DotEnv
     /**
      * Configure the options on which the parsed will act
      *
-     * @var array
+     * @var string[]
      */
-    protected $options = [];
+    protected $processors = [];
 
-    public function __construct(string $path, array $options = [])
+    public function __construct(string $path, array $processors = null)
     {
         if (!file_exists($path)) {
             throw new \InvalidArgumentException(sprintf('%s does not exist', $path));
@@ -39,14 +30,30 @@ class DotEnv
 
         $this->path = $path;
 
-        $this->processOptions($options);
+        $this->setProcessors($processors);
     }
 
-    private function processOptions(array $options) : void
+    private function setProcessors(array $processors = null) : DotEnv
     {
-        $this->options = array_merge([
-            static::PROCESS_BOOLEANS => true
-        ], $options);
+        /**
+         * Fill with default processors
+         */
+        if ($processors === null) {
+            $this->processors = [
+                BooleanProcessor::class,
+                QuotedProcessor::class
+            ];
+
+            return $this;
+        }
+
+        foreach ($processors as $processor) {
+            if (is_subclass_of($processor, AbstractProcessor::class)) {
+                $this->processors[] = $processor;
+            }
+        }
+
+        return $this;
     }
 
     /**
@@ -78,19 +85,31 @@ class DotEnv
         }
     }
 
-    private function processValue(string $value) {
+    /**
+     * Process the value with the configured processors
+     *
+     * @param string $value The value to process
+     * @return string|bool
+     */
+    private function processValue(string $value)
+    {
+        /**
+         * First trim spaces and quotes if configured
+         */
         $trimmedValue = trim($value);
 
-        if (!empty($this->options[static::PROCESS_BOOLEANS])) {
-            $loweredValue = strtolower($trimmedValue);
+        foreach ($this->processors as $processor) {
+            /** @var AbstractProcessor $processorInstance */
+            $processorInstance = new $processor($trimmedValue);
 
-            $isBoolean = in_array($loweredValue, ['true', 'false'], true);
-
-            if ($isBoolean) {
-                return $loweredValue === 'true';
+            if ($processorInstance->canBeProcessed()) {
+                return $processorInstance->execute();
             }
         }
 
+        /**
+         * Does not match any processor options, return as is
+         */
         return $trimmedValue;
     }
 }
