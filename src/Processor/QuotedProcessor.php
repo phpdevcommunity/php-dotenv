@@ -26,6 +26,6 @@ class QuotedProcessor extends AbstractProcessor
 
     private function isWrappedByChar(string $value, string $char) : bool
     {
-        return $value[0] === $char && $value[-1] === $char;
+        return !empty($value) && $value[0] === $char && $value[-1] === $char;
     }
 }
