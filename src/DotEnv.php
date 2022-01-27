@@ -33,7 +33,7 @@ class DotEnv
         $this->setProcessors($processors);
     }
 
-    private function setProcessors(array $processors = null) : DotEnv
+    private function setProcessors(array $processors = null): DotEnv
     {
         /**
          * Fill with default processors
@@ -60,12 +60,13 @@ class DotEnv
      * Processes the $path of the instances and parses the values into $_SERVER and $_ENV, also returns all the data that has been read.
      * Skips empty and commented lines.
      */
-    public function load() : void
+    public function load(): array
     {
         if (!is_readable($this->path)) {
             throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
         }
 
+        $variables = [];
         $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
 
@@ -77,7 +78,16 @@ class DotEnv
             $name = trim($name);
             $value = $this->processValue($value);
 
-            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            $variables[$name] = $value;
+        }
+
+        return $variables;
+    }
+
+    public function expose(array $variables, bool $override = false): void
+    {
+        foreach ($variables as $name => $value) {
+            if ($override || (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV))) {
                 putenv(sprintf('%s=%s', $name, $value));
                 $_ENV[$name] = $value;
                 $_SERVER[$name] = $value;

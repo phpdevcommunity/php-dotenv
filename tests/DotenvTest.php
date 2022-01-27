@@ -19,8 +19,11 @@ class DotenvTest extends TestCase
     /**
      * @runInSeparateProcess
      */
-    public function testLoad() {
-        (new DotEnv($this->env('.env.default')))->load();
+    public function testLoad()
+    {
+        $dotEnv = new DotEnv($this->env('.env.default'));
+        $dotEnv->expose($dotEnv->load());
+
         $this->assertEquals('dev', getenv('APP_ENV'));
         $this->assertEquals('mysql:host=localhost;dbname=test;', getenv('DATABASE_DNS'));
         $this->assertEquals('root', getenv('DATABASE_USER'));
@@ -49,12 +52,14 @@ class DotenvTest extends TestCase
         $this->assertEquals('true', $_SERVER['BOOLEAN_QUOTED']);
     }
 
-    public function testFileNotExist() {
+    public function testFileNotExist()
+    {
         $this->expectException(\InvalidArgumentException::class);
         (new DotEnv($this->env('.env.not-exists')))->load();
     }
 
-    public function testUncompatibleProcessors() {
+    public function testUncompatibleProcessors()
+    {
         $this->assertProcessors(
             [],
             []
@@ -92,7 +97,8 @@ class DotenvTest extends TestCase
         );
     }
 
-    private function getProtectedProperty(object $object, string $property) {
+    private function getProtectedProperty(object $object, string $property)
+    {
         $reflection = new \ReflectionClass($object);
         $reflectionProperty = $reflection->getProperty($property);
         $reflectionProperty->setAccessible(true);
@@ -105,9 +111,10 @@ class DotenvTest extends TestCase
      */
     public function testProcessBoolean()
     {
-        (new DotEnv($this->env('.env.boolean'), [
+        $dotEnv = new DotEnv($this->env('.env.boolean'), [
             BooleanProcessor::class
-        ]))->load();
+        ]);
+        $dotEnv->expose($dotEnv->load());
 
         $this->assertEquals(false, $_ENV['FALSE1']);
         $this->assertEquals(false, $_ENV['FALSE2']);
@@ -127,7 +134,8 @@ class DotenvTest extends TestCase
      */
     public function testDontProcessBoolean()
     {
-        (new DotEnv($this->env('.env.boolean'), []))->load();
+        $dotEnv = new DotEnv($this->env('.env.boolean'), []);
+        $dotEnv->expose($dotEnv->load());
 
         $this->assertEquals('false', $_ENV['FALSE1']);
 
@@ -139,9 +147,10 @@ class DotenvTest extends TestCase
      */
     public function testProcessQuotes()
     {
-        (new DotEnv($this->env('.env.quotes'), [
+        $dotEnv = new DotEnv($this->env('.env.quotes'), [
             QuotedProcessor::class
-        ]))->load();
+        ]);
+        $dotEnv->expose($dotEnv->load());
 
         $this->assertEquals('q1', $_ENV['QUOTED1']);
         $this->assertEquals('q2', $_ENV['QUOTED2']);
@@ -157,7 +166,8 @@ class DotenvTest extends TestCase
      */
     public function testDontProcessQuotes()
     {
-        (new DotEnv($this->env('.env.quotes'), []))->load();
+        $dotEnv = new DotEnv($this->env('.env.quotes'), []);
+        $dotEnv->expose($dotEnv->load());
 
         $this->assertEquals('"q1"', $_ENV['QUOTED1']);
         $this->assertEquals('\'q2\'', $_ENV['QUOTED2']);
@@ -166,5 +176,21 @@ class DotenvTest extends TestCase
         $this->assertEquals('\"This is a "sample" value\"', $_ENV['QUOTED5']);
         $this->assertEquals('"q6', $_ENV['QUOTED6']);
         $this->assertEquals('q7"', $_ENV['QUOTED7']);
+    }
+
+    public function testExposeOvveride()
+    {
+        $dotEnv = new DotEnv($this->env('.env.default'));
+        $dotEnv->expose($dotEnv->load());
+
+        $dotEnv = new DotEnv($this->env('.env.override'));
+        $dotEnv->expose($dotEnv->load());
+
+        $this->assertEquals('dev', $_ENV['APP_ENV']);
+
+        $dotEnv = new DotEnv($this->env('.env.override'));
+        $dotEnv->expose($dotEnv->load(), true);
+
+        $this->assertEquals('prod', $_ENV['APP_ENV']);
     }
 }
