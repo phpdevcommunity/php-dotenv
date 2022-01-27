@@ -17,27 +17,28 @@ use DevCoder\DotEnv;
 
 $absolutePathToEnvFile = __DIR__ . '/.env';
 
-(new DotEnv($absolutePathToEnvFile))->load();
+$dotEnv = new DotEnv($absolutePathToEnvFile);
+$dotEnv->expose($dotEnv->load());
 ```
 
 # Use them!
 ```php
 /**
- * string(33) "mysql:host=localhost;dbname=test;" 
+ * string(33) "mysql:host=localhost;dbname=test;"
  */
 var_dump(getenv('DATABASE_DNS'));
 
 /**
  * Removes double and single quotes from the variable:
- * 
- * string(4) "root" 
+ *
+ * string(4) "root"
  */
 var_dump(getenv('DATABASE_USER'));
 
 /**
  * Processes booleans as such:
- * 
- * bool(true) 
+ *
+ * bool(true)
  */
 var_dump(getenv('MODULE_ENABLED'));
 ```
