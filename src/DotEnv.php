@@ -5,6 +5,8 @@ namespace DevCoder;
 use DevCoder\Processor\AbstractProcessor;
 use DevCoder\Processor\BooleanProcessor;
 use DevCoder\Processor\QuotedProcessor;
+use InvalidArgumentException;
+use RuntimeException;
 
 class DotEnv
 {
@@ -13,19 +15,19 @@ class DotEnv
      *
      * @var string
      */
-    protected $path;
+    protected string $path;
 
     /**
      * Configure the options on which the parsed will act
      *
      * @var string[]
      */
-    protected $processors = [];
+    protected array $processors = [];
 
     public function __construct(string $path, array $processors = null)
     {
         if (!file_exists($path)) {
-            throw new \InvalidArgumentException(sprintf('%s does not exist', $path));
+            throw new InvalidArgumentException(sprintf('%s does not exist', $path));
         }
 
         $this->path = $path;
@@ -33,7 +35,7 @@ class DotEnv
         $this->setProcessors($processors);
     }
 
-    private function setProcessors(array $processors = null) : DotEnv
+    private function setProcessors(array $processors = null): self
     {
         /**
          * Fill with default processors
@@ -60,10 +62,10 @@ class DotEnv
      * Processes the $path of the instances and parses the values into $_SERVER and $_ENV, also returns all the data that has been read.
      * Skips empty and commented lines.
      */
-    public function load() : void
+    public function load(): void
     {
         if (!is_readable($this->path)) {
-            throw new \RuntimeException(sprintf('%s file is not readable', $this->path));
+            throw new RuntimeException(sprintf('%s file is not readable', $this->path));
         }
 
         $lines = file($this->path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -89,7 +91,7 @@ class DotEnv
      * Process the value with the configured processors
      *
      * @param string $value The value to process
-     * @return string|bool
+     * @return mixed
      */
     private function processValue(string $value)
     {

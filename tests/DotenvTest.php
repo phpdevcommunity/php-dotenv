@@ -20,7 +20,9 @@ class DotenvTest extends TestCase
      * @runInSeparateProcess
      */
     public function testLoad() {
+
         (new DotEnv($this->env('.env.default')))->load();
+
         $this->assertEquals('dev', getenv('APP_ENV'));
         $this->assertEquals('mysql:host=localhost;dbname=test;', getenv('DATABASE_DNS'));
         $this->assertEquals('root', getenv('DATABASE_USER'));
@@ -31,20 +33,17 @@ class DotenvTest extends TestCase
         $this->assertEquals('true', getenv('BOOLEAN_QUOTED'));
 
         $this->assertEquals('dev', $_ENV['APP_ENV']);
-        $this->assertEquals('mysql:host=localhost;dbname=test;', $_ENV['DATABASE_DNS']);
-        $this->assertEquals('root', $_ENV['DATABASE_USER']);
         $this->assertEquals('password', $_ENV['DATABASE_PASSWORD']);
-        $this->assertFalse(array_key_exists('GOOGLE_API', $_ENV));
-        $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_ENV));
+        $this->assertArrayNotHasKey('GOOGLE_API', $_ENV);
+        $this->assertArrayNotHasKey('GOOGLE_MANAGER_KEY', $_ENV);
         $this->assertEquals(true, $_ENV['BOOLEAN_LITERAL']);
         $this->assertEquals('true', $_ENV['BOOLEAN_QUOTED']);
 
-        $this->assertEquals('dev', $_SERVER['APP_ENV']);
         $this->assertEquals('mysql:host=localhost;dbname=test;', $_SERVER['DATABASE_DNS']);
         $this->assertEquals('root', $_SERVER['DATABASE_USER']);
         $this->assertEquals('password', $_SERVER['DATABASE_PASSWORD']);
-        $this->assertFalse(array_key_exists('GOOGLE_API', $_SERVER));
-        $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_SERVER));
+        $this->assertArrayNotHasKey('GOOGLE_API', $_SERVER);
+        $this->assertArrayNotHasKey('GOOGLE_MANAGER_KEY', $_SERVER);
         $this->assertEquals(true, $_SERVER['BOOLEAN_LITERAL']);
         $this->assertEquals('true', $_SERVER['BOOLEAN_QUOTED']);
     }
@@ -54,7 +53,7 @@ class DotenvTest extends TestCase
         (new DotEnv($this->env('.env.not-exists')))->load();
     }
 
-    public function testUncompatibleProcessors() {
+    public function testIncompatibleProcessors() {
         $this->assertProcessors(
             [],
             []
@@ -88,13 +87,13 @@ class DotenvTest extends TestCase
 
         $this->assertEquals(
             $expectedProcessors,
-            $this->getProtectedProperty($dotEnv, 'processors')
+            $this->getProtectedProperty($dotEnv)
         );
     }
 
-    private function getProtectedProperty(object $object, string $property) {
+    private function getProtectedProperty(object $object) {
         $reflection = new \ReflectionClass($object);
-        $reflectionProperty = $reflection->getProperty($property);
+        $reflectionProperty = $reflection->getProperty('processors');
         $reflectionProperty->setAccessible(true);
 
         return $reflectionProperty->getValue($object);
