@@ -9,7 +9,7 @@ Use [Composer](https://getcomposer.org/)
 
 ### Composer Require
 ```
-composer require devcoder-xyz/php-router
+composer require devcoder-xyz/php-dotenv
 ```
 
 ## Requirements
