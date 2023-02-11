@@ -3,10 +3,10 @@
 namespace Test\DevCoder;
 
 use DevCoder\DotEnv;
-use DevCoder\Option;
 use DevCoder\Processor\BooleanProcessor;
+use DevCoder\Processor\NullProcessor;
+use DevCoder\Processor\NumberProcessor;
 use DevCoder\Processor\QuotedProcessor;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 class DotenvTest extends TestCase
@@ -46,6 +46,28 @@ class DotenvTest extends TestCase
         $this->assertArrayNotHasKey('GOOGLE_MANAGER_KEY', $_SERVER);
         $this->assertEquals(true, $_SERVER['BOOLEAN_LITERAL']);
         $this->assertEquals('true', $_SERVER['BOOLEAN_QUOTED']);
+
+        $this->assertEquals('🪄', $_SERVER['EMOJI']);
+
+        $this->assertIsInt($_SERVER['ZERO_LITERAL']);
+        $this->assertEquals(0, $_SERVER['ZERO_LITERAL']);
+
+        $this->assertIsString($_SERVER['ZERO_QUOTED']);
+        $this->assertEquals('0', $_SERVER['ZERO_QUOTED']);
+
+        $this->assertIsInt($_SERVER['NUMBER_LITERAL']);
+        $this->assertEquals(1111, $_SERVER['NUMBER_LITERAL']);
+
+        $this->assertIsString($_SERVER['NUMBER_QUOTED']);
+        $this->assertEquals('1111', $_SERVER['NUMBER_QUOTED']);
+
+        $this->assertNull($_SERVER['NULL_LITERAL']);
+        $this->assertArrayHasKey('NULL_LITERAL', $_SERVER);
+
+        $this->assertEquals('null', $_SERVER['NULL_QUOTED']);
+
+        $this->assertEquals('', $_SERVER['EMPTY_LITERAL']);
+        $this->assertEquals('', $_SERVER['EMPTY_QUOTED']);
     }
 
     public function testFileNotExist() {
@@ -53,6 +75,9 @@ class DotenvTest extends TestCase
         (new DotEnv($this->env('.env.not-exists')))->load();
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testIncompatibleProcessors() {
         $this->assertProcessors(
             [],
@@ -61,7 +86,12 @@ class DotenvTest extends TestCase
 
         $this->assertProcessors(
             null,
-            [BooleanProcessor::class, QuotedProcessor::class]
+            [
+                NullProcessor::class,
+                BooleanProcessor::class,
+                NumberProcessor::class,
+                QuotedProcessor::class
+            ]
         );
 
         $this->assertProcessors(
@@ -80,6 +110,9 @@ class DotenvTest extends TestCase
         );
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     private function assertProcessors(array $processorsToUse = null, array $expectedProcessors = [])
     {
         $dotEnv = new DotEnv($this->env('.env.default'), $processorsToUse);
@@ -165,5 +198,23 @@ class DotenvTest extends TestCase
         $this->assertEquals('\"This is a "sample" value\"', $_ENV['QUOTED5']);
         $this->assertEquals('"q6', $_ENV['QUOTED6']);
         $this->assertEquals('q7"', $_ENV['QUOTED7']);
+        $this->assertEquals('0', $_ENV['ZERO_LITERAL']);
+        $this->assertEquals('"0"', $_ENV['ZERO_QUOTED']);
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testProcessNumbers()
+    {
+        (new DotEnv($this->env('.env.number'), [
+            NumberProcessor::class
+        ]))->load();
+
+        $this->assertEquals(0, $_ENV['NUMBER1']);
+        $this->assertIsNumeric($_ENV['NUMBER1']);
+        $this->assertEquals(0.0001, $_ENV['NUMBER2']);
+        $this->assertEquals(123456789, $_ENV['NUMBER3']);
+        $this->assertEquals(123456789.0, $_ENV['NUMBER4']);
     }
 }

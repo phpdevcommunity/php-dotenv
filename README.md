@@ -24,6 +24,8 @@ DATABASE_DNS=mysql:host=localhost;dbname=test;
 DATABASE_USER="root"
 DATABASE_PASSWORD=root
 MODULE_ENABLED=true
+NUMBER_LITERAL=0
+NULL_VALUE=null
 ```
 
 ## Load the variables
@@ -57,6 +59,20 @@ var_dump(getenv('DATABASE_USER'));
  * bool(true) 
  */
 var_dump(getenv('MODULE_ENABLED'));
+
+/**
+ * Process the numeric value:
+ * 
+ * int(0) 
+ */
+var_dump(getenv('NUMBER_LITERAL'));
+
+/**
+ * Check for literal null values:
+ * 
+ * NULL
+ */
+var_dump(getenv('NULL_VALUE'));
 ```
 
 Ideal for small project
@@ -76,3 +92,13 @@ NOTE: ``VARIABLE="true"`` will be processed to ```string(4) "true"```
 ## QuotedProcessor
 
 ``VARIABLE="anything"`` will be processed to ```string(8) "anything"```
+
+## NullProcessor
+
+``VARIABLE=null`` will be processed to ```NULL```
+
+## NumberProcessor
+
+``VARIABLE=0`` will be processed to ```int(0)```
+
+``VARIABLE=0.1`` will be processed to ```float(0.1)```

@@ -4,6 +4,8 @@ namespace DevCoder;
 
 use DevCoder\Processor\AbstractProcessor;
 use DevCoder\Processor\BooleanProcessor;
+use DevCoder\Processor\NullProcessor;
+use DevCoder\Processor\NumberProcessor;
 use DevCoder\Processor\QuotedProcessor;
 use InvalidArgumentException;
 use RuntimeException;
@@ -42,7 +44,9 @@ class DotEnv
          */
         if ($processors === null) {
             $this->processors = [
+                NullProcessor::class,
                 BooleanProcessor::class,
+                NumberProcessor::class,
                 QuotedProcessor::class
             ];
 
