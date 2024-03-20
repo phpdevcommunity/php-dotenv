@@ -37,34 +37,9 @@ class DotEnv
         $this->setProcessors($processors);
     }
 
-    private function setProcessors(array $processors = null): self
-    {
-        /**
-         * Fill with default processors
-         */
-        if ($processors === null) {
-            $this->processors = [
-                NullProcessor::class,
-                BooleanProcessor::class,
-                NumberProcessor::class,
-                QuotedProcessor::class
-            ];
-
-            return $this;
-        }
-
-        foreach ($processors as $processor) {
-            if (is_subclass_of($processor, AbstractProcessor::class)) {
-                $this->processors[] = $processor;
-            }
-        }
-
-        return $this;
-    }
-
     /**
-     * Processes the $path of the instances and parses the values into $_SERVER and $_ENV, also returns all the data that has been read.
-     * Skips empty and commented lines.
+     * Loads the configuration data from the specified file path.
+     * Parses the values into $_SERVER and $_ENV arrays, skipping empty and commented lines.
      */
     public function load(): void
     {
@@ -90,6 +65,29 @@ class DotEnv
             }
         }
     }
+
+    private function setProcessors(array $processors = null): void
+    {
+        /**
+         * Fill with default processors
+         */
+        if ($processors === null) {
+            $this->processors = [
+                NullProcessor::class,
+                BooleanProcessor::class,
+                NumberProcessor::class,
+                QuotedProcessor::class
+            ];
+            return;
+        }
+
+        foreach ($processors as $processor) {
+            if (is_subclass_of($processor, AbstractProcessor::class)) {
+                $this->processors[] = $processor;
+            }
+        }
+    }
+
 
     /**
      * Process the value with the configured processors

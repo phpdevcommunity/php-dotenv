@@ -14,7 +14,12 @@ class QuotedProcessor extends AbstractProcessor
 
         return $this->isWrappedByChar($this->value, '\'');
     }
-
+    /**
+     * Executes the function and returns a substring of the value property of the current object,
+     * excluding the first and last characters.
+     *
+     * @return string The substring of the value property.
+     */
     public function execute()
     {
         /**

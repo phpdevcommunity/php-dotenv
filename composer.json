@@ -1,6 +1,6 @@
 {
     "name": "devcoder-xyz/php-dotenv",
-    "description": "Parses .env files",
+    "description": "PHP-DotEnv is a lightweight PHP library designed to simplify the management of environment variables in your PHP applications.",
     "type": "library",
     "license": "MIT",
     "authors": [

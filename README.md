@@ -1,24 +1,31 @@
-# php-dotenv
-# Loads environment variables from .env file to getenv(), $_ENV and $_SERVER.
+# PHP-DotEnv 
+
 [![Latest Stable Version](https://poser.pugx.org/devcoder-xyz/php-dotenv/v)](https://packagist.org/packages/devcoder-xyz/php-dotenv) [![Total Downloads](https://poser.pugx.org/devcoder-xyz/php-dotenv/downloads)](https://packagist.org/packages/devcoder-xyz/php-dotenv) [![Latest Unstable Version](https://poser.pugx.org/devcoder-xyz/php-dotenv/v/unstable)](//packagist.org/packages/devcoder-xyz/php-dotenv) [![License](https://poser.pugx.org/devcoder-xyz/php-dotenv/license)](https://packagist.org/packages/devcoder-xyz/php-dotenv)
 [![PHP Version Require](http://poser.pugx.org/devcoder-xyz/php-dotenv/require/php)](https://packagist.org/packages/devcoder-xyz/php-dotenv)
 
+## Introduction
+PHP-DotEnv is a lightweight PHP library designed to simplify the management of environment variables in your PHP applications. It provides an elegant solution for loading configuration values from a `.env` file into the environment variables accessible via `getenv()`, `$_ENV`, and `$_SERVER`. This documentation aims to guide you through the installation, usage, and features of PHP-DotEnv.
+
 ## Installation
 
-Use [Composer](https://getcomposer.org/)
+To install PHP-DotEnv, you can use [Composer](https://getcomposer.org/), the dependency manager for PHP.
 
 ### Composer Require
-```
+```bash
 composer require devcoder-xyz/php-dotenv
 ```
 
 ## Requirements
 
-* PHP version 7.4
+- PHP version 7.4 or higher
 
-**How to use ?**
+## Usage
 
-```
+### 1. Define Environment Variables
+
+Before using PHP-DotEnv, you need to define your environment variables in a `.env` file. This file should be placed in the root directory of your project. Each line in the file should follow the `KEY=VALUE` format.
+
+```dotenv
 APP_ENV=dev
 DATABASE_DNS=mysql:host=localhost;dbname=test;
 DATABASE_USER="root"
@@ -28,7 +35,9 @@ NUMBER_LITERAL=0
 NULL_VALUE=null
 ```
 
-## Load the variables
+### 2. Load the Variables
+
+After defining your environment variables, you can load them into your PHP application using PHP-DotEnv.
 
 ```php
 <?php
@@ -39,66 +48,62 @@ $absolutePathToEnvFile = __DIR__ . '/.env';
 (new DotEnv($absolutePathToEnvFile))->load();
 ```
 
-# Use them!
+### 3. Access Environment Variables
+
+Once loaded, you can access the environment variables using PHP's `getenv()` function.
+
 ```php
 /**
- * string(33) "mysql:host=localhost;dbname=test;" 
+ * Retrieve the value of DATABASE_DNS
  */
 var_dump(getenv('DATABASE_DNS'));
-
-/**
- * Removes double and single quotes from the variable:
- * 
- * string(4) "root" 
- */
-var_dump(getenv('DATABASE_USER'));
-
-/**
- * Processes booleans as such:
- * 
- * bool(true) 
- */
-var_dump(getenv('MODULE_ENABLED'));
-
-/**
- * Process the numeric value:
- * 
- * int(0) 
- */
-var_dump(getenv('NUMBER_LITERAL'));
-
-/**
- * Check for literal null values:
- * 
- * NULL
- */
-var_dump(getenv('NULL_VALUE'));
 ```
 
-Ideal for small project
+### Automatic Type Conversion
 
-Simple and easy!
+PHP-DotEnv provides automatic type conversion for certain types of values:
 
-# Processors
+- Booleans: Processed as `true` or `false`.
+- Quoted Strings: Surrounding quotes are removed.
+- Null Values: Converted to `null`.
+- Numeric Values: Converted to integers or floats.
 
-Also the variables are parsed according to the configuration passed as parameter to the constructor. The available processors are:
+## Processors
 
-## BooleanProcessor
+PHP-DotEnv allows you to define custom processors to handle specific types of values in your `.env` file. These processors enable you to control how values are parsed and converted.
 
-``VARIABLE=false`` will be processed to ```bool(false)```
+### BooleanProcessor
 
-NOTE: ``VARIABLE="true"`` will be processed to ```string(4) "true"```
+The `BooleanProcessor` converts boolean values specified in the `.env` file to PHP boolean types (`true` or `false`).
 
-## QuotedProcessor
+```dotenv
+MODULE_ENABLED=true
+```
 
-``VARIABLE="anything"`` will be processed to ```string(8) "anything"```
+### QuotedProcessor
 
-## NullProcessor
+The `QuotedProcessor` removes surrounding quotes from quoted strings in the `.env` file.
 
-``VARIABLE=null`` will be processed to ```NULL```
+```dotenv
+DATABASE_USER="root"
+```
 
-## NumberProcessor
+### NullProcessor
 
-``VARIABLE=0`` will be processed to ```int(0)```
+The `NullProcessor` converts the string "null" to the PHP `null` value.
 
-``VARIABLE=0.1`` will be processed to ```float(0.1)```
+```dotenv
+NULL_VALUE=null
+```
+
+### NumberProcessor
+
+The `NumberProcessor` converts numeric values to integers or floats.
+
+```dotenv
+NUMBER_LITERAL=0
+```
+
+## Conclusion
+
+PHP-DotEnv offers a straightforward and efficient solution for managing environment variables in PHP applications. By providing automatic type conversion and customizable processors, it simplifies the process of loading and handling configuration values from `.env` files. Whether you're working on a small project or a large-scale application, PHP-DotEnv can help streamline your development process and ensure smooth configuration management. Explore its features, integrate it into your projects, and experience the convenience it brings to your PHP development workflow.
