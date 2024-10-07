@@ -1,12 +1,12 @@
 <?php
 
-namespace DevCoder;
+namespace PhpDevCommunity;
 
-use DevCoder\Processor\AbstractProcessor;
-use DevCoder\Processor\BooleanProcessor;
-use DevCoder\Processor\NullProcessor;
-use DevCoder\Processor\NumberProcessor;
-use DevCoder\Processor\QuotedProcessor;
+use PhpDevCommunity\Processor\AbstractProcessor;
+use PhpDevCommunity\Processor\BooleanProcessor;
+use PhpDevCommunity\Processor\NullProcessor;
+use PhpDevCommunity\Processor\NumberProcessor;
+use PhpDevCommunity\Processor\QuotedProcessor;
 use InvalidArgumentException;
 use RuntimeException;
 

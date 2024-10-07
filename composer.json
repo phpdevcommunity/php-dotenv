@@ -1,28 +1,25 @@
 {
-    "name": "devcoder-xyz/php-dotenv",
+    "name": "phpdevcommunity/php-dotenv",
     "description": "PHP-DotEnv is a lightweight PHP library designed to simplify the management of environment variables in your PHP applications.",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "F.Michel",
-            "email": "dev@devcoder.xyz"
+            "name": "F. Michel",
+            "homepage": "https://www.phpdevcommunity.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "DevCoder\\": "src",
-            "Test\\DevCoder\\": "tests"
+            "PhpDevCommunity\\": "src",
+            "Test\\PhpDevCommunity\\": "tests"
         }
-    },
-    "scripts": {
-        "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always --testdox",
-        "test:coverage": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always  --testdox --coverage-clover build/logs/clover.xml --coverage-html build/coverage"
     },
     "require": {
         "php": ">=7.4"
     },
+    "minimum-stability": "alpha",
     "require-dev": {
-        "phpunit/phpunit": "9.6.3"
+        "phpdevcommunity/unitester": "^0.1.0@alpha"
     }
 }

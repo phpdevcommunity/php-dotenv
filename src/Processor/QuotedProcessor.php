@@ -1,6 +1,6 @@
 <?php
 
-namespace DevCoder\Processor;
+namespace PhpDevCommunity\Processor;
 
 class QuotedProcessor extends AbstractProcessor
 {

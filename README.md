@@ -1,9 +1,5 @@
 # PHP-DotEnv 
 
-[![Latest Stable Version](https://poser.pugx.org/devcoder-xyz/php-dotenv/v)](https://packagist.org/packages/devcoder-xyz/php-dotenv) [![Total Downloads](https://poser.pugx.org/devcoder-xyz/php-dotenv/downloads)](https://packagist.org/packages/devcoder-xyz/php-dotenv) [![Latest Unstable Version](https://poser.pugx.org/devcoder-xyz/php-dotenv/v/unstable)](//packagist.org/packages/devcoder-xyz/php-dotenv) [![License](https://poser.pugx.org/devcoder-xyz/php-dotenv/license)](https://packagist.org/packages/devcoder-xyz/php-dotenv)
-[![PHP Version Require](http://poser.pugx.org/devcoder-xyz/php-dotenv/require/php)](https://packagist.org/packages/devcoder-xyz/php-dotenv)
-
-## Introduction
 PHP-DotEnv is a lightweight PHP library designed to simplify the management of environment variables in your PHP applications. It provides an elegant solution for loading configuration values from a `.env` file into the environment variables accessible via `getenv()`, `$_ENV`, and `$_SERVER`. This documentation aims to guide you through the installation, usage, and features of PHP-DotEnv.
 
 ## Installation
@@ -12,7 +8,7 @@ To install PHP-DotEnv, you can use [Composer](https://getcomposer.org/), the dep
 
 ### Composer Require
 ```bash
-composer require devcoder-xyz/php-dotenv
+composer require phpdevcommunity/php-dotenv
 ```
 
 ## Requirements
@@ -41,7 +37,7 @@ After defining your environment variables, you can load them into your PHP appli
 
 ```php
 <?php
-use DevCoder\DotEnv;
+use PhpDevCommunity\DotEnv;
 
 $absolutePathToEnvFile = __DIR__ . '/.env';
 

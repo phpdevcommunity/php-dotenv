@@ -1,16 +1,63 @@
 <?php
 
-namespace Test\DevCoder;
+namespace Test\PhpDevCommunity;
 
-use DevCoder\DotEnv;
-use DevCoder\Processor\BooleanProcessor;
-use DevCoder\Processor\NullProcessor;
-use DevCoder\Processor\NumberProcessor;
-use DevCoder\Processor\QuotedProcessor;
-use PHPUnit\Framework\TestCase;
+use PhpDevCommunity\DotEnv;
+use PhpDevCommunity\Processor\BooleanProcessor;
+use PhpDevCommunity\Processor\NullProcessor;
+use PhpDevCommunity\Processor\NumberProcessor;
+use PhpDevCommunity\Processor\QuotedProcessor;
+use PhpDevCommunity\UniTester\TestCase;
 
 class DotenvTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // TODO: Implement setUp() method.
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearAllEnv();
+    }
+
+    private function clearAllEnv(): void
+    {
+        foreach ($_ENV as $key => $value) {
+            unset($_ENV[$key]);
+        }
+        foreach ($_SERVER as $key => $value) {
+            unset($_SERVER[$key]);
+        }
+    }
+
+    protected function execute(): void
+    {
+        $this->clearAllEnv();
+        $this->testLoad();
+        $this->clearAllEnv();
+
+        $this->testFileNotExist();
+        $this->clearAllEnv();
+
+        $this->testIncompatibleProcessors();
+        $this->clearAllEnv();
+
+        $this->testProcessBoolean();
+        $this->clearAllEnv();
+
+        $this->testDontProcessBoolean();
+        $this->clearAllEnv();
+
+        $this->testProcessQuotes();
+        $this->clearAllEnv();
+
+        $this->testDontProcessQuotes();
+        $this->clearAllEnv();
+
+        $this->testProcessNumbers();
+    }
+
     private function env(string $file)
     {
         return __DIR__ . DIRECTORY_SEPARATOR . 'env' . DIRECTORY_SEPARATOR . $file;
@@ -34,35 +81,36 @@ class DotenvTest extends TestCase
 
         $this->assertEquals('dev', $_ENV['APP_ENV']);
         $this->assertEquals('password', $_ENV['DATABASE_PASSWORD']);
-        $this->assertArrayNotHasKey('GOOGLE_API', $_ENV);
-        $this->assertArrayNotHasKey('GOOGLE_MANAGER_KEY', $_ENV);
+        $this->assertFalse(array_key_exists('GOOGLE_API', $_ENV));
+        $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_ENV));
+
         $this->assertEquals(true, $_ENV['BOOLEAN_LITERAL']);
         $this->assertEquals('true', $_ENV['BOOLEAN_QUOTED']);
 
         $this->assertEquals('mysql:host=localhost;dbname=test;', $_SERVER['DATABASE_DNS']);
         $this->assertEquals('root', $_SERVER['DATABASE_USER']);
         $this->assertEquals('password', $_SERVER['DATABASE_PASSWORD']);
-        $this->assertArrayNotHasKey('GOOGLE_API', $_SERVER);
-        $this->assertArrayNotHasKey('GOOGLE_MANAGER_KEY', $_SERVER);
+        $this->assertFalse(array_key_exists('GOOGLE_API', $_SERVER));
+        $this->assertFalse(array_key_exists('GOOGLE_MANAGER_KEY', $_SERVER));
         $this->assertEquals(true, $_SERVER['BOOLEAN_LITERAL']);
         $this->assertEquals('true', $_SERVER['BOOLEAN_QUOTED']);
 
         $this->assertEquals('🪄', $_SERVER['EMOJI']);
 
-        $this->assertIsInt($_SERVER['ZERO_LITERAL']);
+        $this->assertTrue(is_int($_SERVER['ZERO_LITERAL']));
         $this->assertEquals(0, $_SERVER['ZERO_LITERAL']);
 
-        $this->assertIsString($_SERVER['ZERO_QUOTED']);
+        $this->assertTrue(is_string($_SERVER['ZERO_QUOTED']));
         $this->assertEquals('0', $_SERVER['ZERO_QUOTED']);
 
-        $this->assertIsInt($_SERVER['NUMBER_LITERAL']);
+        $this->assertTrue(is_int($_SERVER['NUMBER_LITERAL']));
         $this->assertEquals(1111, $_SERVER['NUMBER_LITERAL']);
 
-        $this->assertIsString($_SERVER['NUMBER_QUOTED']);
+        $this->assertTrue(is_string($_SERVER['NUMBER_QUOTED']));
         $this->assertEquals('1111', $_SERVER['NUMBER_QUOTED']);
 
         $this->assertNull($_SERVER['NULL_LITERAL']);
-        $this->assertArrayHasKey('NULL_LITERAL', $_SERVER);
+        $this->assertTrue(array_key_exists('NULL_LITERAL', $_SERVER));
 
         $this->assertEquals('null', $_SERVER['NULL_QUOTED']);
 
@@ -71,8 +119,9 @@ class DotenvTest extends TestCase
     }
 
     public function testFileNotExist() {
-        $this->expectException(\InvalidArgumentException::class);
-        (new DotEnv($this->env('.env.not-exists')))->load();
+        $this->expectException(\InvalidArgumentException::class, function () {
+            (new DotEnv($this->env('.env.not-exists')))->load();
+        });
     }
 
     /**
@@ -162,7 +211,6 @@ class DotenvTest extends TestCase
         (new DotEnv($this->env('.env.boolean'), []))->load();
 
         $this->assertEquals('false', $_ENV['FALSE1']);
-
         $this->assertEquals('true', $_ENV['TRUE1']);
     }
 
@@ -212,7 +260,7 @@ class DotenvTest extends TestCase
         ]))->load();
 
         $this->assertEquals(0, $_ENV['NUMBER1']);
-        $this->assertIsNumeric($_ENV['NUMBER1']);
+        $this->assertTrue(is_numeric($_ENV['NUMBER1']));
         $this->assertEquals(0.0001, $_ENV['NUMBER2']);
         $this->assertEquals(123456789, $_ENV['NUMBER3']);
         $this->assertEquals(123456789.0, $_ENV['NUMBER4']);

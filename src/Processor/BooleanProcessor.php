@@ -1,5 +1,5 @@
 <?php
-namespace DevCoder\Processor;
+namespace PhpDevCommunity\Processor;
 
 class BooleanProcessor extends AbstractProcessor
 {
